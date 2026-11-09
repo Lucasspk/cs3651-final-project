@@ -1,9 +1,7 @@
-#include <Servo.h>
-Servo myServo; // servo object
 void setup() {
-  myServo.attach(9);
   pinMode(19, OUTPUT); // GREEN LED pin (Reaction time)
   pinMode(21, INPUT); // Reaction time button
+  pinMode(9, OUTPUT);
 }
 // ------------------------------------------------------------------------------------------------
 unsigned long avgReactionTime = 0;
