@@ -1,7 +1,12 @@
+const int SERVO_PIN = 9;
+int positionPercent = 50;
+
 void setup() {
   pinMode(19, OUTPUT); // GREEN LED pin (Reaction time)
   pinMode(21, INPUT); // Reaction time button
-  pinMode(9, OUTPUT);
+  pinMode(SERVO_PIN, OUTPUT);
+
+  Serial.begin(115200);
 }
 // ------------------------------------------------------------------------------------------------
 unsigned long avgReactionTime = 0;
@@ -54,9 +59,19 @@ void testReactionTime() {
 }
 // ------------------------------------------------------------------------------------------------
 void lockServo() {
-  myServo.write(0);
-  delay(1000);
+  positionPercent = 100;
+  int pulseWidth = map(positionPercent, 0, 100, 1000, 2000);
+  for (int i = 0; i < 100; i++) {
+    digitalWrite(SERVO_PIN, HIGH);
+    delayMicroseconds(pulseWidth);
+  
+    digitalWrite(SERVO_PIN, LOW);
+  
+    delayMicroseconds(20000 - pulseWidth);
+    delay(1000);
+  }
 }
+
 void unlockServo() {
   myServo.write(180);
   delay(1000);
