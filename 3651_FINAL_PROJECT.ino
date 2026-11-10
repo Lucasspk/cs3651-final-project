@@ -2,6 +2,9 @@
 #include <LiquidCrystal_I2C.h>
 const int SERVO_PIN = 9;
 int positionPercent = 50;
+bool reactionPassed = false; // vars for passed tests.
+bool breathalyzerPassed = false;
+bool horizontalNystagmusPassed = false;
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 void setup() {
   pinMode(19, OUTPUT); // GREEN LED pin (Reaction time)
@@ -72,24 +75,29 @@ void testReactionTime() {
   lcd.clear();
   if (totalTime <= (1.25 * avgReactionTime)) { // alcohol at legal limit slows ur reaction time by about 15-20%, so the test is passed if the reaction taken is less than 1.25*avgReactionTime.
     lcd.print("Passed reaction test!");
-    digitalWrite(19, HIGH);
-    delay(500);
-    digitalWrite(19, LOW);
-    delay(500);
-    digitalWrite(19, HIGH);
-    delay(500);
-    digitalWrite(19, LOW);
-    delay(500);
-    digitalWrite(19, HIGH);
-    delay(500);
-    digitalWrite(19, LOW);
+    reactionPassed = true;
+    delay(2000);
   } else {
     lcd.print("Failed reaction test!");
+    reactionPassed = false;
+    delay(2000);
+
   }
   lcd.clear();
 }
 // ------------------------------------------------------------------------------------------------
+void testBreathalyzer() {
+  // implmenet later or smthn
+}
+// ------------------------------------------------------------------------------------------------
+void testNystagmus() {
+  // super implement later
+}
+// ------------------------------------------------------------------------------------------------
 void lockServo() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Locking...");
   positionPercent = 100;
   int pulseWidth = map(positionPercent, 0, 100, 1000, 2000);
   for (int i = 0; i < 100; i++) {
@@ -103,6 +111,9 @@ void lockServo() {
 }
 
 void unlockServo() {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Unlocking...");
   positionPercent = 0;
   int pulseWidth = map(positionPercent, 0, 100, 1000, 2000);
   for (int i = 0; i < 100; i++) {
@@ -116,6 +127,30 @@ void unlockServo() {
 }
 
 void loop() {
+  // lcd says to put item inside and click to lock:
+  lcd.setCursor(0,0);
+  lcd.print("Put item in box");
+  lcd.setCursor(0,1);
+  lcd.print("Click to lock box");
+  while(!digitalRead(21)) {
+    // do nothing
+  }
+  lockServo(); // lock servo and set all tests to false
+  reactionPassed = false;
+  breathalyzerPassed = false;
+  horizontalNystagmusPassed = false;
+  // Setup reaction time on start:
   setReactionTime();
+  lcd.print("Click to unlock");
+  while(!digitalRead(21)) {
+    // do nothing
+  }
   testReactionTime();
+  testBreathalyzer();
+  testNystagmus();
+  if (reactionPassed && breathalyzerPassed && horizontalNystagmusPassed) { // if all pass then unlock box
+    unlockServo();
+  } else {
+    delay(300000); // delay 5 minutes until u can try again.
+  }
 }
